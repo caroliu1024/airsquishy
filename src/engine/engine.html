@@ -55538,6 +55538,40 @@ const MP_SOURCES = [
 const MODELS = [
   new URL('./models/hand_landmarker.task', location.href).href,
 ];
+// ---- 手势识别提前下载 ----
+// 识别程序（wasm，约 9MB）和模型（约 7.8MB）只有第一次用手捏时才需要。原来是点了「打开摄像头」、摄像头开好以后才一个接一个地下载，
+// 网速一般时要等十几到几十秒，全屏教学这段时间一直是空的。现在：电脑上页面空闲后就在后台悄悄下载；手机上一表现出想用手捏（点「伸手捏一捏」、
+// 弹出摄像头提醒）就开始下载；两个文件同时下，并且记录进度，界面上显示百分比。下载好的模型直接拿来用，wasm 进了浏览器缓存，之后打开都很快
+const MP_SIZE = { model:7819105, wasm:9423986 };
+const MP_PRE = { p:null, got:{ model:0, wasm:0 } };
+function mpFetch(url, key){
+  return fetch(url).then(async r => {
+    if (!r.ok) throw new Error('http ' + r.status);
+    if (!r.body || !r.body.getReader){ const b = new Uint8Array(await r.arrayBuffer()); MP_PRE.got[key] = MP_SIZE[key]; return b; }
+    const rd = r.body.getReader(), parts = []; let n = 0;
+    for (;;){ const { done, value } = await rd.read(); if (done) break; parts.push(value); n += value.length; MP_PRE.got[key] = Math.min(n, MP_SIZE[key]); }
+    const out = new Uint8Array(n); let o = 0; for (const v of parts){ out.set(v, o); o += v.length; }
+    MP_PRE.got[key] = MP_SIZE[key]; return out;
+  });
+}
+function mpPrefetch(){
+  if (MP_PRE.p) return MP_PRE.p;
+  if (window.__MPVISION){ MP_PRE.got.model = MP_SIZE.model; MP_PRE.got.wasm = MP_SIZE.wasm; return MP_PRE.p = { model:Promise.resolve(null), bundle:Promise.resolve(null), wasm:Promise.resolve(null) }; }   // 单文件版：都在页面里了
+  const model = (async () => { for (const m of MODELS){ try { return await mpFetch(m, 'model'); } catch (e){} } return null; })();
+  const bundle = loadFirst(MP_SOURCES.map(x => x.bundle)).catch(() => null);
+  // wasm 只是预热浏览器缓存（MediaPipe 之后会用同一个地址去取）；拿到的数据不留在内存里
+  const wasm = mpFetch(MP_SOURCES[0].wasm + '/vision_wasm_internal.wasm', 'wasm').then(() => true, () => (MP_PRE.got.wasm = MP_SIZE.wasm, false));
+  model.catch(() => {}); return MP_PRE.p = { model, bundle, wasm };
+}
+window.__mpPrefetch = mpPrefetch;
+window.__mpProgress = () => (MP_PRE.got.model + MP_PRE.got.wasm)/(MP_SIZE.model + MP_SIZE.wasm);
+// 电脑（鼠标）上：页面加载完、空闲下来以后在后台提前下载（省流量模式、2G/3G 网络不下）
+addEventListener('load', () => {
+  const c = navigator.connection || {}, slow = c.saveData || /2g|3g/.test(c.effectiveType || '');
+  if (slow || !matchMedia('(pointer:fine)').matches) return;
+  const go = () => { try { mpPrefetch(); } catch (e){} };
+  setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(go, { timeout:4000 }) : go()), 2500);
+});
 let landmarker = null, stream = null, camOn = false, lastVideoTime = -1, lastResult = null;
 const video = $('video');
 const hands = { Left:null, Right:null };
@@ -55554,6 +55588,7 @@ async function startCamera(){
     setStatus('这个浏览器或页面不支持摄像头。请用部署包放到 HTTPS 网站上，或在本地用 localhost 打开。', true); return;
   }
   btn.disabled = true; setStatus('正在请求摄像头…');
+  const pre = landmarker ? null : mpPrefetch();   // 和摄像头授权同时开始下载
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video:{ width:{ideal:640}, height:{ideal:480}, facingMode:'user' }, audio:false });
   } catch (e){
@@ -55574,15 +55609,21 @@ async function startCamera(){
         files = { wasmLoaderPath: embUrl('emb-loader', 'text/javascript'), wasmBinaryPath: embUrl('emb-wasm', 'application/wasm') };
         modelBuf = embBytes('emb-model');
       } else {
-        const r = await loadFirst(MP_SOURCES.map(x => x.bundle));
+        const r = (pre && await pre.bundle) || await loadFirst(MP_SOURCES.map(x => x.bundle));
         vision = r.mod;
-        files = await vision.FilesetResolver.forVisionTasks(MP_SOURCES.find(x => x.bundle === r.url).wasm);
+        [files, modelBuf] = await Promise.all([vision.FilesetResolver.forVisionTasks(MP_SOURCES.find(x => x.bundle === r.url).wasm), pre ? pre.model : null]);
+        if (pre) await pre.wasm;   // 等 wasm 下载完（已进缓存），MediaPipe 再去取就是瞬间
       }
       if (!modelBuf) for (const m of MODELS){ try { const r = await fetch(m); if (r.ok){ modelBuf = new Uint8Array(await r.arrayBuffer()); break; } } catch {} }
       if (!modelBuf) throw new Error('model');
       const opts = d => ({ baseOptions:{ modelAssetBuffer:modelBuf, delegate:d }, runningMode:'VIDEO', numHands:2, minHandDetectionConfidence:.5, minHandPresenceConfidence:.5, minTrackingConfidence:.5 });
       try { landmarker = await vision.HandLandmarker.createFromOptions(files, opts('GPU')); }
       catch { landmarker = await vision.HandLandmarker.createFromOptions(files, opts('CPU')); }
+      // 预热：第一次识别时显卡要现编着色器，新用户的电脑上会卡住好几秒（实测 M1 Pro 约 6 秒，之后浏览器会记住）。
+      // 原来这一下发生在手势教学已经弹出来之后，看起来就是“教学出来了却半天不动”。现在放在加载进度卡片还在的时候先做掉
+      MP_PRE.got.model = MP_SIZE.model; MP_PRE.got.wasm = MP_SIZE.wasm; setStatus('马上就好…');
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60)));   // 先让“马上就好”显示出来
+      try { const c = document.createElement('canvas'); c.width = 320; c.height = 240; const g = c.getContext('2d'); g.fillStyle = '#d9b8b0'; g.fillRect(0, 0, 320, 240); landmarker.detectForVideo(c, performance.now()); lastVideoTime = -1; } catch (e){}
     }
   } catch (e){
     console.error(e); stopCamera(); btn.disabled = false;

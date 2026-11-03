@@ -42,7 +42,9 @@ function enterImmersive(hand){
   if (camIsOn()) return;
   if (hand || (!camDeclined && !isTouchPhone())) showCamPrompt(); else ensureStarted();
 }
-function showCamPrompt(){ $('intro').hidden = true; $('cpErr').hidden = true; $('camPrompt').hidden = false; }
+function showCamPrompt(){ $('intro').hidden = true; $('cpErr').hidden = true; $('camPrompt').hidden = false; prefetchHands(); }
+// 一表现出想用手捏（弹出摄像头提醒、点「伸手捏一捏」/「试试用手捏」），就在后台开始下载手势识别
+function prefetchHands(){ try { window.__mpPrefetch && window.__mpPrefetch(); } catch (e){} }
 // 「老用户」= 在这个新版流程里完整走完过全屏教学（5 步 + 点「开始玩」）的人。
 // 不用旧的 nn-tut-v1 标记：以前的版本里点过教学、关掉过教学面板也会写上它，会把还没走过新流程的人误当成老用户
 const ONB_KEY = 'airsquishy-onb-done';
@@ -124,9 +126,20 @@ $('cpOpen').onclick = () => {
   body.classList.remove('immersed');
   camPending = performance.now(); onbDone = false;
   if (!camIsOn()){ camBypass = true; $('camBtn').click(); camBypass = false; }
+  syncMpLoad();   // 进度卡片立刻出现，不等下一次定时检查
 };
 $('cpSkip').onclick = () => { startAudio(); $('camPrompt').hidden = true; setOnb(false); camDeclined = true; };
+// 等摄像头和手势识别准备好的这段时间：显示下载进度，不让全屏教学空着
+function syncMpLoad(){
+  const show = !!camPending && !camIsOn() && body.dataset.page === 'immersive';
+  $('mpLoad').hidden = !show; if (!show) return;
+  const p = window.__mpProgress ? window.__mpProgress() : 0, pct = Math.min(99, Math.round(p*100));
+  $('mpBar').style.width = Math.max(3, pct) + '%'; $('mpPct').textContent = pct + '%';
+  const t = p >= .995 ? '马上就好…' : '正在准备手势识别';
+  if ($('mpTitle').dataset.zh !== t){ $('mpTitle').dataset.zh = t; $('mpTitle').textContent = window.__t ? window.__t(t) : t; }
+}
 setInterval(() => {
+  syncMpLoad();
   $('handPill').hidden = !(body.dataset.page === 'immersive' && !camIsOn() && !camPending && $('camPrompt').hidden && $('intro').hidden && $('allSheet').hidden);
   if (camPending){
     if (camIsOn()){ camPending = 0; if (closeTutOnCam) closeTutUntil = performance.now() + 3000; relayout(); setTimeout(relayout, 300); setTimeout(relayout, 900); }   // 摄像头画面出来后再排一次版，教学时捏捏、手势标记和画面对齐
