@@ -48,8 +48,8 @@ s=s.replace(old_ls, "Lmax:(owner === 'grab' ? 3 + Math.random()*.7 : 1.25 + Math
 s=s.rstrip()+'\n<script type="module">\n'+ui+'</script>\n'
 # 竖着拿的平板也用手机布局：改写样式表里的媒体查询（max-width:720px = 手机；min-width:721px = 电脑）
 def _mq(prelude):
-    MOB=[['(max-width:720px)','(orientation:portrait)'],['(max-width:720px)','(min-height:501px)'],['(max-width:720px)','(pointer:fine)'],['(max-width:1100px)','(orientation:portrait)','(pointer:coarse)']]
-    DESK=[['(min-width:721px)','(orientation:landscape)'],['(min-width:721px)','(pointer:fine)'],['(min-width:1101px)'],['(orientation:landscape)','(max-height:500px)','(pointer:coarse)']]
+    MOB=[['(max-width:720px)','(orientation:portrait)'],['(max-width:720px)','(min-height:501px)'],['(max-width:900px)','(pointer:fine)'],['(max-width:1100px)','(orientation:portrait)','(pointer:coarse)']]
+    DESK=[['(min-width:721px)','(orientation:landscape)','(pointer:coarse)'],['(min-width:901px)','(pointer:fine)'],['(min-width:1101px)'],['(orientation:landscape)','(max-height:500px)','(pointer:coarse)']]
     out=[]
     for q in [x.strip() for x in prelude.split(',')]:
         terms=[t.strip() for t in re.split(r'\s+and\s+', q)]

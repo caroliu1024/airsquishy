@@ -2,7 +2,8 @@
 // 用手机布局：窄屏，或者竖着拿的平板（触屏、宽不超过 1100、竖屏）。和样式表里的条件保持一致
 // 手机横屏：触屏、横着、高度不超过 500。用专门的紧凑布局（左边细栏 + 右边竖排工具），不走手机竖屏布局
 window.__isPL = (W = innerWidth, H = innerHeight) => W > H && H <= 500 && matchMedia('(pointer:coarse)').matches;
-window.__isMob = (W = innerWidth, H = innerHeight) => (W <= 720 && !window.__isPL(W, H)) || (W <= 1100 && H >= W && matchMedia('(pointer:coarse)').matches);
+// 电脑上窗口比较窄（不到 900）时也用手机布局：两侧栏会把捏捏挤得很小
+window.__isMob = (W = innerWidth, H = innerHeight) => (W <= 720 && !window.__isPL(W, H)) || (W <= 900 && matchMedia('(pointer:fine)').matches) || (W <= 1100 && H >= W && matchMedia('(pointer:coarse)').matches);
 (function(){
   const PAGES = ['home', 'library', 'immersive', 'about'];
   const h = location.hash.replace('#', '');
