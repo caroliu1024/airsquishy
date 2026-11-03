@@ -55566,12 +55566,15 @@ function mpPrefetch(){
 window.__mpPrefetch = mpPrefetch;
 window.__mpProgress = () => (MP_PRE.got.model + MP_PRE.got.wasm)/(MP_SIZE.model + MP_SIZE.wasm);
 // 电脑（鼠标）上：页面加载完、空闲下来以后在后台提前下载（省流量模式、2G/3G 网络不下）
-addEventListener('load', () => {
-  const c = navigator.connection || {}, slow = c.saveData || /2g|3g/.test(c.effectiveType || '');
-  if (slow || !matchMedia('(pointer:fine)').matches) return;
-  const go = () => { try { mpPrefetch(); } catch (e){} };
-  setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(go, { timeout:4000 }) : go()), 2500);
-});
+{ // 这段脚本可能在页面 load 事件之后才跑到（前面有 await），所以两种情况都要处理
+  const idlePrefetch = () => {
+    const c = navigator.connection || {}, slow = c.saveData || /2g|3g/.test(c.effectiveType || '');
+    if (slow || !matchMedia('(pointer:fine)').matches) return;
+    const go = () => { try { mpPrefetch(); } catch (e){} };
+    setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(go, { timeout:4000 }) : go()), 2500);
+  };
+  if (document.readyState === 'complete') idlePrefetch(); else addEventListener('load', idlePrefetch);
+}
 let landmarker = null, stream = null, camOn = false, lastVideoTime = -1, lastResult = null;
 const video = $('video');
 const hands = { Left:null, Right:null };
