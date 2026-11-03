@@ -1,0 +1,56 @@
+AirSquishy · 空气捏捏
+Copyright © 2026 Caroline. All rights reserved. 保留所有权利。
+
+======================================================================
+中文
+======================================================================
+本仓库中的源代码、原创造型（团子、小猫、水滴、吐司、星星、蜜桃软糖、小恐龙、
+云朵、小企鹅、猫爪）、界面与视觉设计、文案、音效设计及说明图（以下统称“本作品”）
+的著作权归 Caroline 所有。
+
+本仓库公开仅用于展示作品、学习参考和反馈问题，并不授予任何开源许可。
+除非事先获得 Caroline 的书面许可，任何人不得：
+  1. 复制、转载、镜像或再发布本作品的全部或部分；
+  2. 修改、改编本作品，或基于本作品制作衍生作品；
+  3. 将本作品的全部或部分用于任何商业用途（包括但不限于售卖、广告、
+     付费服务、商业网站或应用）；
+  4. 以本作品的名称、造型或设计冒充或暗示与 Caroline 有关。
+
+允许的行为：在 GitHub 网站上浏览本仓库；为了提交问题或建议而查看代码；
+在不改动的前提下分享本仓库或网站的链接。
+
+第三方组件（three.js、MediaPipe 及其模型、字体、来自 Sketchfab / Poly Haven 的
+3D 模型）的版权归各自作者所有，按其各自的许可使用，不受本声明约束，
+详见 THIRD_PARTY.md。
+
+如需授权或合作，请联系：cliu1226@gmail.com
+
+======================================================================
+English
+======================================================================
+The source code, original designs (Mochi, Kitty, Droplet, Toasty, Star,
+Peach Gummy, Little Dino, Cloud, Penguin, Cat Paw), interface and visual
+design, copy, sound design and documentation images in this repository
+(together, "the Work") are copyright Caroline.
+
+This repository is public only to showcase the Work, for reference and for
+reporting feedback. No open-source license is granted. Without Caroline's
+prior written permission, you may not:
+  1. copy, repost, mirror or redistribute all or part of the Work;
+  2. modify or adapt the Work, or create derivative works based on it;
+  3. use all or part of the Work for any commercial purpose (including but
+     not limited to selling it, advertising, paid services, or commercial
+     websites or apps);
+  4. use the Work's name, characters or designs to impersonate or imply an
+     association with Caroline.
+
+You may: view this repository on GitHub; read the code in order to report
+issues or suggestions; share unmodified links to this repository or the
+website.
+
+Third-party components (three.js, MediaPipe and its model, fonts, and 3D
+models from Sketchfab / Poly Haven) remain the property of their authors and
+are used under their own licenses, which this notice does not change. See
+THIRD_PARTY.md.
+
+For licensing or collaboration: cliu1226@gmail.com

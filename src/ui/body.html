@@ -1,0 +1,235 @@
+<video id="video" class="cambg" playsinline muted hidden></video>
+<canvas id="stage" aria-label="3D 捏捏：按住按压，按住拖动拉扯"></canvas>
+<canvas id="overlay" aria-hidden="true"></canvas>
+
+<header class="topbar">
+  <button class="logo" type="button" data-go="home" aria-label="AirSquishy 首页">
+    <svg viewBox="0 0 48 44" aria-hidden="true"><path d="M5 4.5c4.2 1.4 7.5 3.8 10.3 6.6a26 26 0 0 1 17.4 0C35.5 8.3 38.8 5.9 43 4.5c1.6 4.4 1.9 9.6.6 14.4 2 2.8 3 5.9 3 9.1C46.6 37 36.6 42 24 42S1.4 37 1.4 28c0-3.2 1-6.3 3-9.1C3.1 14.1 3.4 8.9 5 4.5Z" fill="#4A2F27"/><path d="M24 22c-9.2 0-15.6 3.4-15.6 8.2 0 5.3 7 7.9 15.6 7.9s15.6-2.6 15.6-7.9C39.6 25.4 33.2 22 24 22Z" fill="#FFF6EE"/><path d="M14.5 26.5q2.5-2.6 5 0M28.5 26.5q2.5-2.6 5 0" stroke="#4A2F27" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M22.2 29.6h3.6L24 31.6Z" fill="#F07C9B"/><path d="M24 31.6q-1.6 2.2-3.6 1.2M24 31.6q1.6 2.2 3.6 1.2" stroke="#4A2F27" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="13" cy="31" rx="2.6" ry="1.6" fill="#F7A9BC" opacity=".8"/><ellipse cx="35" cy="31" rx="2.6" ry="1.6" fill="#F7A9BC" opacity=".8"/></svg>
+    <span class="logo-t"><i>Air</i>Squishy</span>
+  </button>
+  <nav class="nav card" aria-label="主导航">
+    <button type="button" data-go="home">首页</button>
+    <button type="button" data-go="immersive">捏一捏</button>
+    <button type="button" data-go="about">关于</button>
+  </nav>
+  <div class="tools">
+    <button class="lang-btn" id="langBtn" type="button" data-noi18n="1" aria-label="切换语言 / Switch language">EN</button>
+    <button class="iconbtn" id="searchBtn" type="button" aria-label="搜索素材"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+    <span class="avatar" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="12.5" r="6" fill="#fff" opacity=".95"/><path d="M5 30c1.4-6.4 5.8-9.5 11-9.5S25.6 23.6 27 30Z" fill="#fff" opacity=".95"/></svg></span>
+  </div>
+</header>
+
+<!-- 首页：静态主视觉，之后替换为动态设计 -->
+<section class="page home" id="pgHome" aria-label="首页">
+  <canvas id="homeGL" aria-label="能按、能捏、能拉长的果冻字 SQUISHY；往下滚动会融化成一个团子"></canvas>
+  <div class="h-k">REACH OUT · SQUISH THE AIR</div>
+  <div class="h-cn" id="hCn"><h1>空气捏捏</h1><p>每一个字母都能按、能捏、能拉长</p></div>
+  <div class="h-cta" id="hCta"><button class="cta" type="button" id="hHand">✋ 伸手捏一捏</button><button class="ghost" type="button" id="hMouse">用鼠标玩</button><button class="h-shelf-link" type="button" id="hShelfBtn">往下滚，挑一个捏捏 ↓</button></div>
+  <div class="h-shelf" id="hShelf"><div class="h-shelf-row"><button class="h-arr" type="button" id="hPrev" aria-label="上一个">‹</button><h2 id="hShelfName">团子</h2><button class="h-arr" type="button" id="hNext" aria-label="下一个">›</button></div><p>左右拖动 · 滚动切换 · 中间那个可以直接按</p><button class="cta" type="button" id="hShelfGo">捏这个 →</button></div>
+  <button class="ghost h-all" type="button" id="hAll">⌕ 全部捏捏</button>
+  <div class="h-side l" id="hSideL">SCROLL ↓<br>字母融化后<br>挑一个捏捏</div>
+  <div class="h-side r" id="hSideR">按住字母 = 压扁<br>往上拖 = 拉长<br>松手 = Q 弹</div>
+</section>
+
+<!-- 全部捏捏：全屏浮层（搜索 + 分类），在首页货架、捏一捏页左栏、右上角搜索都能打开 -->
+<button class="hand-pill only-imm" type="button" id="handPill" hidden>✋ 试试用手捏</button>
+<div class="allsheet" id="allSheet" hidden role="dialog" aria-label="全部捏捏">
+<aside class="lib-list" id="libList" aria-label="全部捏捏">
+  <div class="lib-head"><h2>全部捏捏</h2><span id="libCount"></span><button class="sheet-x" type="button" id="allClose" aria-label="关闭">×</button></div>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="libSearch" type="search" placeholder="搜一搜：猫、草莓、薯片…" autocomplete="off"></label>
+  <div class="pills" id="libCats" role="group" aria-label="分类"></div>
+  <div class="lib-grid" id="libGrid"></div>
+  <div class="pick-bar" id="pickBar" hidden><span>已选：<b id="pickName"></b></span><button class="cta" type="button" id="pickGo">捏这个 →</button></div>
+</aside>
+</div>
+<aside class="lib-detail card only-lib" id="libDetail" aria-label="素材信息" hidden>
+  <div class="ld-top"><img id="ldThumb" alt=""><div><span class="ld-cat" id="ldCat"></span><h3 id="ldName"></h3></div></div>
+  <div class="tags" id="ldTags"></div>
+  <div class="label">材质 · 点一下换手感</div>
+  <div class="orbs" id="ldMats"></div>
+  <div class="matinfo" id="ldMatInfo"></div>
+  <div class="label">蜡壳 · 可套在任意材质外面</div>
+  <div class="waxes" id="ldWax"></div>
+  <p class="hint" id="ldWaxHint"></p>
+  <div class="ld-actions">
+    <button class="btn" type="button" id="ldReset">重置</button>
+    <button class="btn" type="button" id="ldFront">正面</button>
+    <button class="btn" type="button" id="ldAuto" aria-pressed="false">自动转</button>
+  </div>
+  <p class="credit" id="ldCredit"></p>
+  <button class="cta" type="button" id="goImm"><svg viewBox="0 0 24 24"><path d="M8 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5V4a1.5 1.5 0 0 1 3 0v6m0-4a1.5 1.5 0 0 1 3 0v6m0-3a1.5 1.5 0 0 1 3 0v4.5c0 4.4-3 7.5-7.5 7.5-3 0-4.6-1.3-6.3-3.7L4 14.6a1.6 1.6 0 0 1 2.5-2L8 14"/></svg>进入沉浸体验 · 用手捏</button>
+</aside>
+<div class="lib-tip card only-lib" id="libTip" hidden>鼠标：按住按压，按住拖动拉扯，右键或空格整团握。</div>
+
+<!-- 沉浸体验：左栏造型 -->
+<aside class="side side-l card only-imm" id="panel" aria-label="选捏捏">
+  <div class="label">最近 / 推荐</div>
+  <div class="mini" id="mini"></div>
+  <button class="all-btn" type="button" id="openAll">全部捏捏 →</button>
+  <div class="legacy"><div class="pills seg-cats" id="shapeCats" role="group" aria-label="造型分类"></div>
+  <div class="shapes" id="shapes"></div></div>
+  <p class="credit" id="credit" hidden></p>
+</aside>
+
+<!-- 沉浸体验：右栏调节 -->
+<aside class="side side-r only-imm" id="rpanel" aria-label="调节">
+  <div class="card mixcard">
+    <section class="sec">
+      <h3 class="sec-h">材质</h3>
+      <div class="mats" id="mats"></div>
+      <div class="matinfo" id="matInfo"></div>
+    </section>
+    <section class="sec">
+      <h3 class="sec-h">蜡壳 <small class="sec-sub">套在任意材质外面</small></h3>
+      <div class="layers" id="layers">
+        <div class="waxes" role="group" aria-label="蜡壳厚度"><button type="button" data-l="0">不加<small>原材质</small></button><button type="button" data-l="10">10 倍<small>轻按就碎</small></button><button type="button" data-l="50">50 倍<small>用力才裂</small></button><button type="button" data-l="100">100 倍<small>很硬很响</small></button></div>
+        <div class="hint" id="layerHint"></div>
+      </div>
+    </section>
+    <section class="sec">
+      <h3 class="sec-h">场景</h3>
+      <div class="viewbtns">
+        <button class="btn" id="rotL" type="button" aria-label="按住向左转">⟲ 左转</button>
+        <button class="btn" id="viewFront" type="button">正面</button>
+        <button class="btn" id="rotR" type="button" aria-label="按住向右转">右转 ⟳</button>
+      </div>
+      <div class="slider"><label for="sens">力度</label><input id="sens" type="range" min="0.6" max="1.6" step="0.05" value="1"><output id="sensOut">1.00</output></div>
+      <button class="btn" id="slowBtn" type="button" aria-pressed="false">慢动作</button>
+      <div class="scene-extra"><button class="btn" type="button" id="camReset">重置原形</button><button class="btn" type="button" id="camAuto" aria-pressed="false">自动转</button></div>
+      <p class="hint">空白处拖动可 360° 旋转，滚轮或双指缩放</p>
+    </section>
+    <section class="sec">
+      <h3 class="sec-h">音效</h3>
+      <div class="slider"><label for="vol">音量</label><input id="vol" type="range" min="0" max="1" step="0.05" value="0.7"><output id="volOut">70%</output></div>
+      <div class="sndinfo" id="sndInfo"></div>
+    </section>
+  </div>
+  <div class="card interact">
+    <h3>互动方式</h3>
+    <div class="tiles">
+      <button class="tile on" id="tileMouse" type="button">鼠标/触屏</button>
+      <button class="tile" id="camBtn" type="button">开启摄像头手势</button>
+      <button class="tile" id="tutBtn" type="button" hidden>手势教学</button>
+      <div class="tile ph" id="tutPh" title="开启摄像头后可用">手势教学</div>
+    </div>
+    <div class="status" id="status" role="status">鼠标：按住按压，按住拖动拉扯，右键或空格整团握。</div>
+  </div>
+</aside>
+<button class="edge edge-l only-imm" type="button" data-edge="l" aria-label="展开选捏捏栏"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>选捏捏</button>
+<button class="edge edge-r only-imm" type="button" data-edge="r" aria-label="展开调节栏"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>调节</button>
+
+<aside class="gpanel only-imm" id="gpanel" hidden aria-live="polite"></aside>
+
+<div class="hud card only-stage" aria-live="off">
+  <div class="state" id="hudState">待捏</div>
+  <div class="meter">压力<i id="mPress"></i><span id="vPress">0%</span></div>
+  <div class="meter">握力<i id="mGrip"></i><span id="vGrip">0%</span></div>
+  <div class="meter">形变<i id="mSpeed"></i><span id="vSpeed">0 mm</span></div>
+</div>
+
+<!-- 底部工具条：按压/揉捏/拉伸是手法提示；旋转、握紧、重置是原来的按钮 -->
+<div class="toolbar card only-imm" id="toolbar">
+  <button class="tool" type="button" data-tip="press"><svg viewBox="0 0 24 24"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V11m0-2a1.5 1.5 0 0 1 3 0v2m0-1a1.5 1.5 0 0 1 3 0v1.5m0-.5a1.5 1.5 0 0 1 3 0V16c0 3.9-2.7 6.5-6.5 6.5-2.7 0-4.2-1.1-5.7-3.3L4.5 14.6a1.6 1.6 0 0 1 2.5-2L9 15"/></svg>按压</button>
+  <button class="tool" type="button" data-tip="rub"><svg viewBox="0 0 24 24"><path d="M7.5 12.5V8a1.5 1.5 0 0 1 3 0v3.5m0-5a1.5 1.5 0 0 1 3 0v5m0-4a1.5 1.5 0 0 1 3 0v4.5m0-2a1.5 1.5 0 0 1 3 0V16c0 3.6-2.6 6-6.2 6-2.6 0-4.1-1-5.6-3l-3-4.6a1.6 1.6 0 0 1 2.5-2l1.3 1.6"/><path d="M5 4.5c.9-1 2-1.6 3.2-1.8M3.4 7.4c.2-.7.5-1.3.9-1.9"/></svg>揉捏</button>
+  <button class="tool" type="button" data-tip="pull"><svg viewBox="0 0 24 24"><path d="M3 12h18M6 8.5 2.8 12 6 15.5M18 8.5l3.2 3.5-3.2 3.5"/><circle cx="12" cy="12" r="2.4"/></svg>拉伸</button>
+  <button class="tool" id="autoRot" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.7 5.6M4 12A8 8 0 0 1 17.7 6.4"/><path d="M18 2.5v4h-4M6 21.5v-4h4"/></svg>旋转</button>
+  <button class="tool grip" id="gripBtn" type="button" aria-label="按住整团握紧"><svg viewBox="0 0 24 24"><path d="M7 10.5V9a2 2 0 0 1 4 0v1m0-.5V8a2 2 0 0 1 4 0v2m0-.5a2 2 0 0 1 4 0V14c0 4.2-3 7.5-7.2 7.5-3.4 0-6.3-2.6-6.8-6V12a1.8 1.8 0 0 1 3.6 0v1.5"/><path d="M11 14.5c1.4-.7 3-.8 4.5-.2"/></svg><b>握紧</b></button>
+  <button class="tool" id="resetBtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 3.5V8h4.5"/></svg>重置</button>
+  <button class="tool mob" id="drawerBtn" type="button" aria-label="打开调节"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>调节</button>
+</div>
+<div class="tooltip only-imm" id="tooltip" role="status"></div>
+
+<!-- 关于 -->
+<section class="page" id="pgAbout" aria-label="关于">
+  <div class="about-wrap ab">
+    <header class="ab-hero">
+      <div class="ab-k">ABOUT · v1.0</div>
+      <h1>关于 <i>Air</i>Squishy</h1>
+      <p class="ab-sub">一个可以伸手、隔空去捏的 3D 捏捏。</p>
+      <p class="ab-en">A 3D squishy you squeeze with your bare hands — through your webcam, in thin air.</p>
+    </header>
+
+    <div class="card ab-spons">
+      <h2>请 AirSquishy 喝杯奶茶 🧋 <span class="ab-tag">SPONSOR</span></h2>
+      <p>AirSquishy 完全免费、没有广告，是我利用业余时间一点点做出来的。如果它让你放松了一会儿，欢迎随手请它喝杯奶茶——<b>不赞助也完全没关系</b>，常来捏捏就是最好的支持 💗</p>
+      <p class="ab-use">你的赞助会用在：网站的服务器和域名费用 · 做更多原创捏捏和新手感 · 偶尔给熬夜的我买杯奶茶</p>
+      <div class="ab-btns">
+        <a class="ab-btn" id="sponAfdian" href="https://afdian.com/u/857b4802d6e511f18b5452540025c377" target="_blank" rel="noopener">⚡ 爱发电 <small>微信 / 支付宝都能付</small></a>
+        <a class="ab-btn alt" id="sponKofi" href="https://ko-fi.com/caroline1024" target="_blank" rel="noopener">☕ Ko-fi <small>Card / PayPal</small></a>
+      </div>
+      <p class="ab-thanks">💐 赞助时留下昵称，会出现在爱发电的感谢名单里。</p>
+    </div>
+
+    <div class="card">
+      <h2>联系我 <span class="ab-tag">CONTACT</span></h2>
+      <p>发现 bug、有想要的新捏捏、或者想聊合作，都欢迎来找我：</p>
+      <div class="ab-contact">
+        <a href="mailto:cliu1226@gmail.com" aria-label="Email" title="Email"><i class="ab-ic ab-ic-mail" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M4 7l8 6 8-6"/></svg></i><b>cliu1226@gmail.com</b></a>
+        <div aria-label="小红书" title="小红书"><i class="ab-ic" aria-hidden="true"><img src="data:image/png;base64,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" alt=""></i><b>103775665</b></div>
+        <a href="https://x.com/Carolineliv0" target="_blank" rel="noopener" aria-label="X" title="X"><i class="ab-ic ab-ic-x" aria-hidden="true"><img src="data:image/png;base64,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" alt=""></i><b>@Carolineliv0</b></a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>为什么做这个网站 <span class="ab-tag">WHY</span></h2>
+      <div class="ab-me"><div class="ab-av" aria-hidden="true">C</div><div>
+        <p>捏捏乐很解压，但真的捏捏会脏、会坏，也没法随身带上几十种手感。AirSquishy 想做一个「永远捏不坏」的虚拟捏捏：打开网页就能捏，不占地方、不花钱；伸出手，隔空就能按、捏、拉、挤。学习、工作累了的时候，花一两分钟捏一捏，让脑袋放空一下。</p>
+        <div class="ab-sig">— Caroline</div>
+      </div></div>
+    </div>
+
+    <div class="card">
+      <h2>怎么玩 <span class="ab-tag">HOW TO PLAY</span></h2>
+      <div class="ab-how">
+        <div><b>✋ 用手捏（推荐）</b>打开摄像头，把手伸到屏幕前：弯手指是按，拇指和食指捏合是捏起，捏住再移动是拉；两只手还可以一起挤、压、拉。第一次会有 5 步手势教学。</div>
+        <div><b>🖱 鼠标 / 触屏</b>按住不动越按越深，按住拖动拉长，右键或空格整团握紧；手机上两根手指可以一起捏。</div>
+        <div><b>🎨 换手感</b>柔软黏土、PU 慢回弹、史莱姆、超软硅胶、凝胶珠填充 5 种材质，还能套一层会裂开的蜡壳。戴上耳机，声音更治愈。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>隐私说明 <span class="ab-tag">PRIVACY</span></h2>
+      <div class="ab-pv">
+        <div><b>📷 摄像头</b>画面只在你的浏览器里实时识别手的位置，不录像、不上传、不保存。关掉摄像头就立刻停止。</div>
+        <div><b>🙅 不用注册</b>不需要账号，不收集姓名、邮箱等个人信息。</div>
+        <div><b>💾 只记小偏好</b>只在你自己的浏览器里记住「做过教学没有」「最近捏过哪几个」，清除浏览器数据就没了。</div>
+      </div>
+    </div>
+
+    <div class="card credits">
+      <h2>致谢与授权 <span class="ab-tag">CREDITS</span></h2>
+      <p>10 件原创造型（团子、小猫、水滴、吐司、星星、蜜桃软糖、小恐龙、云朵、小企鹅、猫爪）由 Caroline 设计。其余 3D 模型来自以下创作者，已转换成可形变的网格，部分重新上色或调整了比例，谢谢他们：</p>
+      <ul id="creditList"></ul>
+      <div class="ab-tech"><span>3D 引擎 · three.js（MIT）</span><span>手势识别 · Google MediaPipe Hand Landmarker（Apache 2.0）</span><span>字体 · Fredoka、Syne、Space Mono、思源黑体（SIL OFL）</span></div>
+      <p class="muted">© 2026 Caroline · AirSquishy。原创造型、界面设计与代码保留所有权利，未经许可请勿转载或商用；第三方模型的版权归原作者所有，按各自授权使用。</p>
+    </div>
+
+    <footer class="ab-foot">AirSquishy v1.0 · Made with 💗 by Caroline</footer>
+  </div>
+</section>
+
+<div class="intro camprompt" id="camPrompt" hidden>
+  <div class="card">
+    <span class="cp-ic" aria-hidden="true"></span>
+    <h2>打开摄像头，用手来捏</h2>
+    <p>用真手去捏：把手伸到屏幕前，弯手指是按，捏合是捏起，双手可以一起挤、一起拉。第一次打开会先带你过一遍手势教学。</p>
+    <p class="cp-err" id="cpErr" hidden></p>
+    <button class="btn primary" id="cpOpen" type="button">打开摄像头</button>
+    <button class="btn" id="cpSkip" type="button">先用鼠标</button>
+    <small>摄像头画面只在你的浏览器里识别，不会上传。戴耳机效果更好。</small>
+  </div>
+</div>
+
+<div class="intro" id="intro" hidden>
+  <div class="card">
+    <h2>来捏一下</h2>
+    <ul>
+      <li><span>鼠标/手指</span><span>按住不动越按越深；按住拖动把它拉长，拉太远会“啪”地弹回去</span></li>
+      <li><span>360° 看</span><span>在空白处拖动旋转，滚轮缩放；也可以点下方的「旋转」</span></li>
+      <li><span>整团握</span><span>右键、空格，或按住下方的「握紧」；手机上两根手指可以一起按、一起捏</span></li>
+      <li><span>摄像头</span><span>五根手指都是实体：弯手指就是往下按，拇指食指捏合会把表面捏起来，捏住再移动是拉扯</span></li>
+    </ul>
+    <button class="btn primary" id="startBtn" type="button">正在加载 3D 引擎…</button>
+    <small>戴耳机效果更好。摄像头画面只在你的浏览器里识别，不会上传。</small>
+  </div>
+</div>
