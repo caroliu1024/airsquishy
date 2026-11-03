@@ -28,7 +28,7 @@
 
 ## 在线体验
 
-👉 **网址：上线后填在这里**（部署在 Cloudflare Pages，见 [部署](#部署)）
+👉 **https://airsquishy.pages.dev**（部署在 Cloudflare Pages，见 [部署](#部署)）
 
 > 建议用电脑上的 Chrome、Edge 或 Safari 打开，并开启浏览器的「硬件加速」；戴上耳机，声音更治愈。
 

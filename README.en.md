@@ -28,7 +28,7 @@ Squishies are great for stress, but real ones get dirty, break, and you can't ca
 
 ## Try it
 
-👉 **Link: added here after launch** (hosted on Cloudflare Pages, see [Deploy](#deploy))
+👉 **https://airsquishy.pages.dev** (hosted on Cloudflare Pages, see [Deploy](#deploy))
 
 > Works best in Chrome, Edge or Safari on a computer with hardware acceleration turned on. Headphones make it extra satisfying.
 
