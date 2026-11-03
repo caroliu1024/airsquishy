@@ -56450,10 +56450,10 @@ function mpPrefetch(){
 }
 window.__mpPrefetch = mpPrefetch;
 window.__mpProgress = () => (MP_PRE.got.model + MP_PRE.got.wasm)/(MP_SIZE.model + MP_SIZE.wasm);
-// 电脑（鼠标）上：页面加载完、空闲下来以后在后台提前下载（省流量模式、2G/3G 网络不下）
+// 电脑（鼠标）上：页面加载完、空闲下来以后在后台提前下载（开了省流量、或者 2G 网络时不下）
 { // 这段脚本可能在页面 load 事件之后才跑到（前面有 await），所以两种情况都要处理
   const idlePrefetch = () => {
-    const c = navigator.connection || {}, slow = c.saveData || /2g|3g/.test(c.effectiveType || '');
+    const c = navigator.connection || {}, slow = c.saveData || /2g/.test(c.effectiveType || '');   // 电脑上网速估计为 3G 也照样下（浏览器常把慢一点的宽带估成 3G）
     if (slow || !matchMedia('(pointer:fine)').matches) return;
     const go = () => { try { mpPrefetch(); } catch (e){} };
     setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(go, { timeout:4000 }) : go()), 2500);
